@@ -7,7 +7,7 @@ from setuptools import setup
 
 # Metadata
 PACKAGE_NAME = "Importing"
-PACKAGE_VERSION = "2.0"
+PACKAGE_VERSION = "1.9"
 PACKAGES = ['peak', 'peak.util']
 
 def get_description():
@@ -33,7 +33,7 @@ setup(
     author="Phillip J. Eby",
     author_email="peak@eby-sarna.com",
     license="PSF or ZPL",
-    #test_suite = 'peak.util.imports',
+    url="http://peak.telecommunity.com/DevCenter/Importing",
 
     packages = PACKAGES,
     namespace_packages = PACKAGES,

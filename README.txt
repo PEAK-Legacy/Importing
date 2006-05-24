@@ -191,3 +191,9 @@ Please do not use any of these API features, as I would like to remove them or
 make them private as soon as the "module inheritance" feature is removed from
 PEAK proper.
 
+
+Mailing List
+------------
+
+Please direct questions regarding this package to the PEAK mailing list; see
+http://www.eby-sarna.com/mailman/listinfo/PEAK/ for details.
