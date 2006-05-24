@@ -13,9 +13,10 @@ distribution, but is now available as a standalone module for your convenience.
 
 The "Importing" toolkit does not install or use any special import hooks, and
 is compatible with zipfile imports, ``py2exe``, etc.  Lazy and weak imports
-require should be compatible with almost any import hooks or hacks, as long as
-they have reasonable support for the ``reload()`` builtin.  The dynamic import
-utilities, however, require only that ``__import__()`` work correctly.
+should be compatible with almost any import hooks or hacks, as long as they
+have reasonable support for the ``reload()`` builtin.  The dynamic import
+utilities, however, require only that ``__import__()`` work correctly, and so
+should work anywhere that normal Python imports work.
 
 .. contents:: **Table of Contents**
 
