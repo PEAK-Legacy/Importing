@@ -4,17 +4,18 @@ __all__ = [
     'importString', 'importObject', 'importSequence', 'importSuite',
     'lazyModule', 'joinPath', 'whenImported', 'getModuleHooks',
 ]
-
 import __main__, sys
 defaultGlobalDict = __main__.__dict__
 
 from types import StringTypes, ModuleType
 from sys import modules
-from peak.util.EigenData import AlreadyRead
+try:
+    from peak.util.EigenData import AlreadyRead
+except ImportError:
+    class AlreadyRead(Exception):pass
 
 
 def importSuite(specs, globalDict=defaultGlobalDict):
-
     """Create a test suite from import specs"""
 
     from unittest import TestSuite
@@ -24,7 +25,6 @@ def importSuite(specs, globalDict=defaultGlobalDict):
     )
 
 def joinPath(modname, relativePath):
-
     """Adjust a module name by a '/'-separated, relative or absolute path"""
 
     module = modname.split('.')
