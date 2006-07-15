@@ -21,8 +21,13 @@ should work anywhere that normal Python imports work.
 NOTE: The 1.9.2 release uses a new version of setuptools (0.6b3) that
 fixes a previous problem with .pth files on Windows with the ``Importing``
 egg.  See `more info on how to fix your existing installation
-<http://www.eby-sarna.com/pipermail/peak/2006-May/002551.html>`_, if you
+<http://www.eby-sarna.com/pipermail/peak/2006-May/002550.html>`_, if you
 experienced this problem with a previous version.
+
+Python 2.3 users: If you are using weak or lazy importing with zipfiles (e.g.
+eggs) you *must* have Python **2.3.5**.  Lesser versions of 2.3 have a bug in
+the ``reload()`` implementation which prevents correct operation of weak and
+lazy imports for modules that are inside zipfiles.
 
 .. contents:: **Table of Contents**
 
