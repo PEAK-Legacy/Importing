@@ -4,11 +4,15 @@ __all__ = [
     'importString', 'importObject', 'importSequence', 'importSuite',
     'lazyModule', 'joinPath', 'whenImported', 'getModuleHooks',
 ]
+
 import __main__, sys
-defaultGlobalDict = __main__.__dict__
 
 from types import StringTypes, ModuleType
 from sys import modules
+from imp import acquire_lock, release_lock
+
+defaultGlobalDict = __main__.__dict__
+
 try:
     from peak.util.EigenData import AlreadyRead
 except ImportError:
@@ -24,6 +28,17 @@ def importSuite(specs, globalDict=defaultGlobalDict):
         [t() for t in importSequence(specs,globalDict)]
     )
 
+
+
+
+
+
+
+
+
+
+
+
 def joinPath(modname, relativePath):
     """Adjust a module name by a '/'-separated, relative or absolute path"""
 
@@ -38,6 +53,32 @@ def joinPath(modname, relativePath):
             module.append(p)
 
     return '.'.join(module)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def importString(name, globalDict=defaultGlobalDict):
     """Import an item specified by a string
@@ -163,7 +204,6 @@ def lazyModule(modname, relativePath=None):
     this is mainly useful for module '__bases__' lists.)"""
 
     def _loadModule(module):
-
         oldGA = LazyModule.__getattribute__
         oldSA = LazyModule.__setattr__
 
@@ -173,20 +213,35 @@ def lazyModule(modname, relativePath=None):
         LazyModule.__getattribute__ = modGA
         LazyModule.__setattr__      = modSA
 
+        acquire_lock()
         try:
-            # Get Python (or supplied 'reload') to do the real import!
-            _loadAndRunHooks(module)
-        except:
-            # Reset our state so that we can retry later
-            if '__file__' not in module.__dict__:
-                LazyModule.__getattribute__ = oldGA.im_func
-                LazyModule.__setattr__      = oldSA.im_func
-            raise
-        try:
-            # Convert to a real module (if under 2.2)
-            module.__class__ = ModuleType
-        except TypeError:
-            pass    # 2.3 will fail, but no big deal
+            try:
+                # don't reload if already loaded!
+                if module.__dict__.keys()==['__name__']:
+                    # Get Python to do the real import!
+                    reload(module)           
+                try:
+                    for hook in getModuleHooks(module.__name__):
+                        hook(module)
+                finally:
+                    # Ensure hooks are not called again, even if they fail
+                    postLoadHooks[module.__name__] = None
+            except:
+                # Reset our state so that we can retry later
+                if '__file__' not in module.__dict__:
+                    LazyModule.__getattribute__ = oldGA.im_func
+                    LazyModule.__setattr__      = oldSA.im_func
+                raise
+
+            try:
+                # Convert to a real module (if under 2.2)
+                module.__class__ = ModuleType
+            except TypeError:
+                pass    # 2.3 will fail, but no big deal
+
+        finally:
+            release_lock()
+
 
 
     class LazyModule(ModuleType):
@@ -206,71 +261,57 @@ def lazyModule(modname, relativePath=None):
     if relativePath:
         modname = joinPath(modname, relativePath)
 
-    if modname not in modules:
-        getModuleHooks(modname) # force an empty hook list into existence
-        modules[modname] = LazyModule(modname)
-        if '.' in modname:
-            # ensure parent module/package is in sys.modules
-            # and parent.modname=module, as soon as the parent is imported
-
-            splitpos = modname.rindex('.')
-            whenImported(
-                modname[:splitpos],
-                lambda m: setattr(m,modname[splitpos+1:],modules[modname])
-            )
-
-    return modules[modname]
+    acquire_lock()
+    try:
+        if modname not in modules:
+            getModuleHooks(modname) # force an empty hook list into existence
+            modules[modname] = LazyModule(modname)
+            if '.' in modname:
+                # ensure parent module/package is in sys.modules
+                # and parent.modname=module, as soon as the parent is imported   
+                splitpos = modname.rindex('.')
+                whenImported(
+                    modname[:splitpos],
+                    lambda m: setattr(m,modname[splitpos+1:],modules[modname])
+                )
+        return modules[modname]
+    finally:
+        release_lock()
 
 
 postLoadHooks = {}
 
 
-def _loadAndRunHooks(module):
 
-    """Load an unactivated "lazy" module object"""
-
-    # if this fails, we haven't called the hooks, so leave them in place
-    # for possible retry of import
-
-    if module.__dict__.keys()==['__name__']:  # don't reload if already loaded!
-        reload(module)
-
-    try:
-        for hook in getModuleHooks(module.__name__):
-            hook(module)
-
-    finally:
-        # Ensure hooks are not called again, even if they fail
-        postLoadHooks[module.__name__] = None
 
 
 def getModuleHooks(moduleName):
 
     """Get list of hooks for 'moduleName'; error if module already loaded"""
 
-    hooks = postLoadHooks.setdefault(moduleName,[])
-
-    if hooks is None:
-        raise AlreadyRead("Module already imported", moduleName)
-
-    return hooks
+    acquire_lock()
+    try:
+        hooks = postLoadHooks.setdefault(moduleName,[])
+        if hooks is None:
+            raise AlreadyRead("Module already imported", moduleName)
+        return hooks
+    finally:
+        release_lock()
 
 
 def _setModuleHook(moduleName, hook):
-
-    if moduleName in modules and postLoadHooks.get(moduleName) is None:
-        # Module is already imported/loaded, just call the hook
-        module = modules[moduleName]
-        hook(module)
-        return module
-
-    getModuleHooks(moduleName).append(hook)
-    return lazyModule(moduleName)
-
-
-
-
-
+    acquire_lock()
+    try:   
+        if moduleName in modules and postLoadHooks.get(moduleName) is None:
+            # Module is already imported/loaded, just call the hook
+            module = modules[moduleName]
+            hook(module)
+            return module
+    
+        getModuleHooks(moduleName).append(hook)
+        return lazyModule(moduleName)
+    finally:
+        release_lock()
 
 
 

@@ -7,7 +7,7 @@ from setuptools import setup
 
 # Metadata
 PACKAGE_NAME = "Importing"
-PACKAGE_VERSION = "1.9.2"
+PACKAGE_VERSION = "1.9.3"
 PACKAGES = ['peak', 'peak.util']
 
 def get_description():
