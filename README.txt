@@ -141,9 +141,9 @@ lazyModule(moduleName)
 
     Example usage::
 
-        sdist = lazyModule('distutils.commands.sdist')
+        sdist = lazyModule('distutils.command.sdist')
 
-    This is roughly equivalent to ``import distutils.commands.sdist as sdist``,
+    This is roughly equivalent to ``import distutils.command.sdist as sdist``,
     except that the real import doesn't take place until/unless you try to
     access some attribute of the ``sdist`` object -- unless of course the
     module was already imported before the above line was executed.
