@@ -326,7 +326,7 @@ def _setModuleHook(moduleName, hook):
 
 
 
-def whenImported(moduleName, hook):
+def whenImported(moduleName, hook=None):
 
     """Call 'hook(module)' when module named 'moduleName' is first used
 
@@ -347,6 +347,11 @@ def whenImported(moduleName, hook):
     specified module, and lazy importing means that any 'ImportError' will be
     deferred until the module is used.
     """
+    if hook is None:
+        def decorate(func):
+            whenImported(moduleName, func)
+            return func
+        return decorate
 
     if '.' in moduleName:
         # If parent is not yet imported, delay hook installation until the
@@ -357,11 +362,6 @@ def whenImported(moduleName, hook):
         )
     else:
         return _setModuleHook(moduleName,hook)
-
-
-
-
-
 
 
 
