@@ -1,6 +1,8 @@
 Dynamic, Lazy, and Weak Imports with the ``Importing`` Toolkit
 ==============================================================
 
+NEW in 1.10: ``@whenImported`` can now be used as a decorator for lazy imports
+
 Need to import an object when all you've got is its name?  Need to lazily
 import modules, such that they don't actually get loaded until you use them?
 Want to have some code in a module that only gets run *if* another module is
