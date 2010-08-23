@@ -166,28 +166,29 @@ be needed to add support when the optional third-party module is imported.  But
 the callback will be invoked only as soon as the third-party module is *used*
 (i.e. any of its attributes are accessed), and not a moment before.
 
-whenImported(moduleName, callback)
-    Call ``callback(module)`` when module named `moduleName` is first used
+@whenImported(moduleName)
+    Call ``func(module)`` when module named `moduleName` is first used
 
-    `callback` must accept one argument: the module object named by
-    `moduleName`.  `moduleName` must be a fully qualified (i.e. absolute)
-    module name.  The callback **must not allow any unhandled exceptions to
-    escape**, or it may prevent other registered callbacks from running.
+    `moduleName` must be a fully qualified (i.e. absolute) module name.
 
-    If the named module has already been loaded, ``callback(module)`` is
-    called immediately, and the module object is returned from this function.
+    If the named module has already been loaded, the decorated function
+    is called immediately.  If the named module is not yet loaded, the
+    decorated function is registered as a callback that will be invoked
+    when the named module is actually used.
 
-    If the module has not been imported, or has only been imported lazily,
-    then the callback is invoked when the module is first *used*, and a lazy
-    import of the module is returned from this function.
+    In either case, the decorated function will be passed one argument:
+    the module object named by `moduleName`.  It **must not allow any
+    unhandled exceptions to escape**, or it may prevent other registered
+    callbacks from running.
 
-    If the module was imported lazily and used before calling this function,
-    the hook is called immediately, and the loaded module is returned from this
-    function.
+    Using this function implies a possible lazy import of the specified module,
+    and lazy importing means that any ``ImportError`` will be deferred until
+    the module is actually used.
 
-    Note that using this function implies a possible lazy import of the
-    specified module, and lazy importing means that any 'ImportError' will be
-    deferred until the module is used.
+    (Note: in older versions of the Importing toolkit, this function actually
+    took a second argument: the callback to be registered or called.  If you
+    use it in this fashion, the return value is not the decorated function, but
+    is instead the module object or lazy module object named by `moduleName`.)
 
 
 Deprecated Features
