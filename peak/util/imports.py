@@ -28,14 +28,14 @@ def importSuite(specs, globalDict=defaultGlobalDict):
         [t() for t in importSequence(specs,globalDict)]
     )
 
-
-
-
-
-
-
-
-
+try:
+    exec("def reraise(t, v, tb): raise t, v, tb")
+except SyntaxError:
+    def reraise(t, v, tb):
+        if v is None: v  = t()
+        if v.__traceback__ is not tb:
+            raise value.with_traceback(tb)
+        raise value
 
 
 
@@ -137,7 +137,7 @@ def importString(name, globalDict=defaultGlobalDict):
                 if '.' not in name:
                     # We've backed up all the way to the beginning, so reraise
                     # the first ImportError we got
-                    raise exc[0],exc[1],exc[2]
+                    reraise(exc[0],exc[1],exc[2])
 
                 # Otherwise back up one position and try again
                 parts = name.split('.')
