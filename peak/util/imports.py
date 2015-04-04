@@ -7,7 +7,11 @@ __all__ = [
 
 import __main__, sys
 
-from types import StringTypes, ModuleType
+from types import ModuleType
+try:
+    from types import StringTypes
+except ImportError:
+    StringTypes = str
 from sys import modules
 from imp import acquire_lock, release_lock
 
@@ -18,12 +22,9 @@ try:
 except ImportError:
     class AlreadyRead(Exception):pass
 
-
 def importSuite(specs, globalDict=defaultGlobalDict):
     """Create a test suite from import specs"""
-
     from unittest import TestSuite
-
     return TestSuite(
         [t() for t in importSequence(specs,globalDict)]
     )
@@ -36,7 +37,6 @@ except SyntaxError:
         if v.__traceback__ is not tb:
             raise value.with_traceback(tb)
         raise value
-
 
 
 def joinPath(modname, relativePath):
